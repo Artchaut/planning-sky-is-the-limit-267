@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendrier et tout et tout</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Mon joli calendrier trop pratique 🦆</h1>
+    <div class="nav">
+      <button id="prev" class="btn icon" aria-label="Previous">‹</button>
+      <button id="today" class="btn">Aujourd'hui</button>
+      <button id="next" class="btn icon" aria-label="Next">›</button>
+    </div>
+    <h2 id="label" class="label"></h2>
+    <div class="views" role="group" aria-label="View">
+      <button class="btn" data-view="month">Mois</button>
+      <button class="btn" data-view="week">Semaine</button>
+      <button class="btn" data-view="agenda">Liste</button>
+    </div>
+    <button id="new" class="btn primary">+ Evénement</button>
+    <details class="menu">
+      <summary class="btn">Data</summary>
+      <div class="menu-panel">
+        <button id="export" class="btn">Exporter en JSON</button>
+        <button id="import" class="btn">Importer JSON…</button>
+        <button id="reload" class="btn">Recharger l'original</button>
+        <input id="file" type="file" accept="application/json,.json" hidden>
+        <p id="status" class="status"></p>
+      </div>
+    </details>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <section>
+        <h3>Catégories</h3>
+        <div id="filters"></div>
+      </section>
+      <section>
+        <h3>7 prochains jours</h3>
+        <div id="upcoming" class="mini-list"></div>
+      </section>
+      <section>
+        <h3>Tâches ouvertes</h3>
+        <div id="tasks" class="mini-list"></div>
+      </section>
+      <p class="hint">Raccourcis: <kbd>n</kbd> nouveau · <kbd>a</kbd> ajd · <kbd>←</kbd><kbd>→</kbd> changer · <kbd>m</kbd><kbd>s</kbd><kbd>l</kbd> vue</p>
+    </aside>
+    <main id="view" class="view"></main>
+  </div>
+
+  <dialog id="dlg">
+    <form id="form" autocomplete="off">
+      <h3 id="dlg-title">New event</h3>
+
+      <div id="scope-row" class="scope" hidden>
+        <strong>Cet événement est récurrent. Appliquer les changements à:</strong>
+        <label><input type="radio" name="scope" value="this" checked> cette occurrence seulement</label>
+        <label><input type="radio" name="scope" value="all"> toute la serie</label>
+      </div>
+
+      <label class="field">Titre
+        <input id="f-title" required maxlength="120">
+      </label>
+
+      <div class="row">
+        <label class="field">Categorie
+          <select id="f-type"></select>
+        </label>
+        <label class="field" id="date-label"><span id="date-text">Date</span>
+          <input id="f-date" type="date" required>
+        </label>
+        <label class="field" id="end-field">Fin
+          <input id="f-end" type="date">
+        </label>
+      </div>
+
+      <label class="check"><input id="f-allday" type="checkbox"> Toute la journée</label>
+      <div class="row" id="time-row">
+        <label class="field">Début <input id="f-start" type="time"></label>
+        <label class="field">Fin <input id="f-endtime" type="time"></label>
+      </div>
+
+      <label class="field">C'est où
+        <input id="f-loc" maxlength="120">
+      </label>
+      <label class="field">Blabla supp
+        <textarea id="f-notes" rows="3"></textarea>
+      </label>
+
+      <label class="check" id="done-row"><input id="f-done" type="checkbox"> Tout fini bam!</label>
+
+      <label class="check" id="repeat-toggle"><input id="f-repeat" type="checkbox">Hebdomadaire</label>
+      <div id="repeat-box" class="repeat" hidden>
+        <div class="row">
+          <label class="field">Toutes les
+            <select id="f-interval">
+              <option value="1">semaines</option>
+              <option value="2">2 semaines</option>
+              <option value="3">3 semaines</option>
+              <option value="4">4 semaines</option>
+            </select>
+          </label>
+          <label class="field">Jusqu'aaa <input id="f-until" type="date"></label>
+        </div>
+        <div id="days" class="days"></div>
+      </div>
+
+      <p id="form-error" class="error" hidden></p>
+      <div class="actions">
+        <button type="button" id="delete" class="btn danger">Suppr</button>
+        <span class="spacer"></span>
+        <button type="button" id="cancel" class="btn">Annuler</button>
+        <button type="submit" class="btn primary">Enregister</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

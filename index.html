@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calendrier et tout et tout</title>
   <link rel="stylesheet" href="style.css">
+  <script>try{var t=localStorage.getItem("calendar-theme-v1");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +21,7 @@
       <button class="btn" data-view="week">Semaine</button>
       <button class="btn" data-view="agenda">Liste</button>
     </div>
+    <button id="theme" class="btn" type="button"></button>
     <button id="new" class="btn primary">+ Evénement</button>
     <details class="menu">
       <summary class="btn">Data</summary>
@@ -36,9 +38,10 @@
   <div class="layout">
     <aside class="sidebar">
       <section>
-        <h3>Catégories</h3>
+        <h3>Categories <button id="cats" class="link" type="button">Modifier</button></h3>
         <div id="filters"></div>
       </section>
+
       <section>
         <h3>7 prochains jours</h3>
         <div id="upcoming" class="mini-list"></div>
@@ -91,6 +94,14 @@
         <textarea id="f-notes" rows="3"></textarea>
       </label>
 
+      <div class="check colorpick">
+        <input id="f-colorcustom" type="checkbox" aria-label="Use a custom colour">
+        <span>Couleur spéciale pour un événement spécial ?</span>
+        <input id="f-color" type="color" value="#2563eb">
+        <small>(couleur catégorie sinon)</small>
+      </div>
+
+
       <label class="check" id="done-row"><input id="f-done" type="checkbox"> Tout fini bam!</label>
 
       <label class="check" id="repeat-toggle"><input id="f-repeat" type="checkbox">Hebdomadaire</label>
@@ -118,6 +129,23 @@
       </div>
     </form>
   </dialog>
+
+  <dialog id="cat-dlg" class="sheet">
+    <header class="sheet-head">
+      <div>
+        <h3>Categories</h3>
+        <p>Clique sur les couleurs ça change les couleurs</p>
+      </div>
+      <button type="button" id="cat-x" class="btn icon ghost" aria-label="Close">✕</button>
+    </header>
+    <div id="cat-list" class="cat-list"></div>
+    <footer class="sheet-foot"> 
+      <button type="button" id="cat-add" class="btn">+ Ajouter une catégorie</button>
+      <span class="spacer"></span>
+      <button type="button" id="cat-close" class="btn primary">All right</button>
+    </footer>
+  </dialog>
+
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>

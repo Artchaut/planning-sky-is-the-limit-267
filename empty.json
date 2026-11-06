@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "settings": { "rangeStart": "2026-09-01", "rangeEnd": "2027-06-30" },
+  "types": [
+    { "id": "coursm", "name": "Maths", "color": "#2563eb" },
+    { "id": "coursp", "name": "Physique", "color": "#2563eb" },
+    { "id": "coursi", "name": "Info", "color": "#2563eb" },
+    { "id": "coursf", "name": "Français", "color": "#2563eb" },
+    { "id": "coursa", "name": "Anglais", "color": "#2563eb" },
+    { "id": "courss", "name": "Sport", "color": "#2563eb" },
+    { "id": "courst", "name": "TIPE", "color": "#2563eb" },
+    { "id": "ds", "name": "DS", "color": "#dc2626" },
+    { "id": "devoir", "name": "Truc à rendre", "color": "#d97706", "todo": true },
+    { "id": "kholle", "name": "Khôlles", "color": "#059669" },
+    { "id": "perso", "name": "Trucs Perso", "color": "#7c3aed" }
+  ],
+  "events": [
+     ]
+}

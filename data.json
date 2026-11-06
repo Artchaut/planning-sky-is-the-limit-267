@@ -1,13 +1,716 @@
 {
   "version": 1,
-  "settings": { "rangeStart": "2026-09-01", "rangeEnd": "2027-06-30" },
+  "settings": {
+    "rangeStart": "2026-09-01",
+    "rangeEnd": "2027-06-30"
+  },
   "types": [
-    { "id": "cours", "name": "Cours", "color": "#2563eb" },
-    { "id": "ds", "name": "DS", "color": "#dc2626" },
-    { "id": "devoir", "name": "Truc à rendre", "color": "#d97706", "todo": true },
-    { "id": "kholle", "name": "Khôlles", "color": "#059669" },
-    { "id": "perso", "name": "Trucs Perso", "color": "#7c3aed" }
+    {
+      "id": "coursm",
+      "name": "Maths",
+      "color": "#2d6ce3"
+    },
+    {
+      "id": "coursp",
+      "name": "Physique",
+      "color": "#c7f020",
+      "todo": false
+    },
+    {
+      "id": "coursi",
+      "name": "Info",
+      "color": "#b858a5"
+    },
+    {
+      "id": "coursf",
+      "name": "Français",
+      "color": "#f71a30"
+    },
+    {
+      "id": "coursa",
+      "name": "Anglais",
+      "color": "#b9b157"
+    },
+    {
+      "id": "courss",
+      "name": "Sport",
+      "color": "#62b35e"
+    },
+    {
+      "id": "courst",
+      "name": "TIPE",
+      "color": "#802d1c"
+    },
+    {
+      "id": "ds",
+      "name": "DS",
+      "color": "#dc2626",
+      "todo": false
+    },
+    {
+      "id": "devoir",
+      "name": "Truc à rendre",
+      "color": "#d97706",
+      "todo": true
+    },
+    {
+      "id": "kholle",
+      "name": "Khôlles",
+      "color": "#059669"
+    },
+    {
+      "id": "perso",
+      "name": "Trucs Perso",
+      "color": "#7c3aed"
+    }
   ],
   "events": [
-     ]
+    {
+      "id": "7eb1492b-53d9-4e5c-adbc-dd133c67d838",
+      "title": "Cours A-H. Puyhaubert",
+      "type": "coursm",
+      "color": "",
+      "allDay": true,
+      "start": "",
+      "end": "",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-02",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          0
+        ],
+        "until": "2026-12-14"
+      },
+      "exceptions": {
+        "2026-11-02": {
+          "title": "Cours A-H. Puyhaubert",
+          "type": "coursm",
+          "color": "",
+          "allDay": false,
+          "start": "08:00",
+          "end": "09:30",
+          "location": "H-207",
+          "notes": ""
+        },
+        "2026-11-09": {
+          "title": "Cours A-H. Puyhaubert",
+          "type": "coursm",
+          "color": "",
+          "allDay": true,
+          "start": "",
+          "end": "",
+          "location": "H-207",
+          "notes": ""
+        }
+      }
+    },
+    {
+      "id": "e4b3b6bf-7b3f-4685-87f3-e8c81d8be0c4",
+      "title": "Cours C. Logé",
+      "type": "coursp",
+      "color": "",
+      "allDay": false,
+      "start": "09:30",
+      "end": "11:30",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-02",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          0
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-21": {
+          "deleted": true
+        },
+        "2026-12-28": {
+          "deleted": true
+        },
+        "2027-02-22": {
+          "deleted": true
+        },
+        "2027-03-01": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "430dc3af-6883-4cbb-b6a0-f54139e8dd0c",
+      "title": "Cours C. Pierrot",
+      "type": "coursf",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "10:00",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-03",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          1
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-22": {
+          "deleted": true
+        },
+        "2026-12-29": {
+          "deleted": true
+        },
+        "2027-02-23": {
+          "deleted": true
+        },
+        "2027-03-02": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "3d7f7290-e4b7-4e5c-8101-5a6bd516ac61",
+      "title": "Cours A-H. Puyhaubert",
+      "type": "coursm",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "09:30",
+      "location": "H-207",
+      "notes": "",
+      "date": "2027-01-04",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          0
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2027-02-22": {
+          "deleted": true
+        },
+        "2027-03-01": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "f22c72c2-c15f-4a31-9bbe-eca6762ea17e",
+      "title": "Cours Fr. Sauvageot",
+      "type": "coursm",
+      "color": "",
+      "allDay": false,
+      "start": "10:00",
+      "end": "11:30",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-03",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          1
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-22": {
+          "deleted": true
+        },
+        "2026-12-29": {
+          "deleted": true
+        },
+        "2027-02-23": {
+          "deleted": true
+        },
+        "2027-03-02": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "10f4723f-4edb-48c1-916a-a361f597d3a5",
+      "title": "Cours H. Déprès",
+      "type": "coursi",
+      "color": "",
+      "allDay": false,
+      "start": "13:30",
+      "end": "15:00",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-03",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          1
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-22": {
+          "deleted": true
+        },
+        "2026-12-29": {
+          "deleted": true
+        },
+        "2027-02-23": {
+          "deleted": true
+        },
+        "2027-03-02": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "a718d3b5-2f18-4c32-bb5e-1e181dfbdb4c",
+      "title": "Cours Fr. Sauvageot",
+      "type": "coursm",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "09:30",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-04",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          2,
+          3
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-23": {
+          "deleted": true
+        },
+        "2026-12-30": {
+          "deleted": true
+        },
+        "2026-12-24": {
+          "deleted": true
+        },
+        "2026-12-31": {
+          "deleted": true
+        },
+        "2027-02-24": {
+          "deleted": true
+        },
+        "2027-03-03": {
+          "deleted": true
+        },
+        "2027-02-25": {
+          "deleted": true
+        },
+        "2027-03-04": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "29a87469-1e5f-4bdb-86c0-a75f055ae100",
+      "title": "Cours C. Logé",
+      "type": "coursp",
+      "color": "",
+      "allDay": false,
+      "start": "09:30",
+      "end": "11:00",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-04",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          2,
+          3
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-23": {
+          "deleted": true
+        },
+        "2026-12-30": {
+          "deleted": true
+        },
+        "2026-12-24": {
+          "deleted": true
+        },
+        "2026-12-31": {
+          "deleted": true
+        },
+        "2027-02-24": {
+          "deleted": true
+        },
+        "2027-03-03": {
+          "deleted": true
+        },
+        "2027-02-25": {
+          "deleted": true
+        },
+        "2027-03-04": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "4ec14d68-880a-4456-9a32-6f82bd46918b",
+      "title": "Cours H. Déprès",
+      "type": "coursi",
+      "color": "",
+      "allDay": false,
+      "start": "11:00",
+      "end": "12:30",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-04",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          2
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-23": {
+          "deleted": true
+        },
+        "2026-12-30": {
+          "deleted": true
+        },
+        "2027-02-24": {
+          "deleted": true
+        },
+        "2027-03-03": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "9afe6b39-60a6-4e75-85d2-b9dd6a4e8724",
+      "title": "Cours Fr. Sauvageot",
+      "type": "coursm",
+      "color": "",
+      "allDay": false,
+      "start": "13:30",
+      "end": "15:30",
+      "location": "E-201",
+      "notes": "",
+      "date": "2026-11-04",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          2
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-23": {
+          "deleted": true
+        },
+        "2026-12-30": {
+          "deleted": true
+        },
+        "2027-02-24": {
+          "deleted": true
+        },
+        "2027-03-03": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "fbb9ab80-d3af-4578-895e-9c99bcbf2f9e",
+      "title": "Cours A-H. Puyhaubert",
+      "type": "coursm",
+      "color": "",
+      "allDay": false,
+      "start": "08:15",
+      "end": "09:45",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-06",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          4
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2027-01-01": {
+          "deleted": true
+        },
+        "2026-12-25": {
+          "deleted": true
+        },
+        "2027-02-26": {
+          "deleted": true
+        },
+        "2027-03-05": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "2b606939-22a3-48c3-bd25-d0c3094dd1eb",
+      "title": "TIPE C. Logé / H. Déprès",
+      "type": "courst",
+      "color": "",
+      "allDay": false,
+      "start": "14:00",
+      "end": "16:00",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-05",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          3
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-24": {
+          "deleted": true
+        },
+        "2026-12-31": {
+          "deleted": true
+        },
+        "2027-02-25": {
+          "deleted": true
+        },
+        "2027-03-04": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "8190a655-1072-42b1-b8b4-cb19265a7907",
+      "title": "EPS",
+      "type": "courss",
+      "color": "",
+      "allDay": false,
+      "start": "16:00",
+      "end": "18:00",
+      "location": "Dehors",
+      "notes": "",
+      "date": "2026-11-05",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 1,
+        "days": [
+          3
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-24": {
+          "deleted": true
+        },
+        "2026-12-31": {
+          "deleted": true
+        },
+        "2027-02-25": {
+          "deleted": true
+        },
+        "2027-03-04": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "fb82f257-4169-44f4-9461-3396506b95b3",
+      "title": "Cours A. Chomat",
+      "type": "coursa",
+      "color": "",
+      "allDay": false,
+      "start": "10:00",
+      "end": "12:00",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-06",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 2,
+        "days": [
+          4
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2027-01-01": {
+          "deleted": true
+        },
+        "2027-02-26": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "bfddc22e-3696-43a6-b5fe-84cf89bd3020",
+      "title": "Cours H. Déprès",
+      "type": "coursi",
+      "color": "",
+      "allDay": false,
+      "start": "10:00",
+      "end": "12:00",
+      "location": "H-207",
+      "notes": "",
+      "date": "2026-11-13",
+      "endDate": "",
+      "recur": {
+        "freq": "weekly",
+        "interval": 2,
+        "days": [
+          4
+        ],
+        "until": "2027-04-03"
+      },
+      "exceptions": {
+        "2026-12-25": {
+          "deleted": true
+        },
+        "2027-03-05": {
+          "deleted": true
+        }
+      }
+    },
+    {
+      "id": "28bbe30b-7371-48f7-bd7a-de9ac104fe79",
+      "title": "DS2 - Anglais",
+      "type": "ds",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "12:00",
+      "location": "Plateau F",
+      "notes": "",
+      "date": "2026-11-07",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "47a00252-40eb-4a96-b617-42686c91f1b5",
+      "title": "DS3 - Physique",
+      "type": "ds",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "12:00",
+      "location": "Plateau F",
+      "notes": "",
+      "date": "2026-11-14",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "f3b21e7a-1b27-490a-ab37-bd205eb19da4",
+      "title": "DS3 - Maths",
+      "type": "ds",
+      "color": "",
+      "allDay": false,
+      "start": "14:00",
+      "end": "18:00",
+      "location": "B-309",
+      "notes": "",
+      "date": "2026-11-20",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "52b85049-7ecd-46f2-af08-33773b1ee2e4",
+      "title": "Forum Prépas",
+      "type": "perso",
+      "color": "#1b8a17",
+      "allDay": false,
+      "start": "09:00",
+      "end": "12:00",
+      "location": "Plateau F",
+      "notes": "Quel plaisir...",
+      "date": "2026-11-21",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "61bf41cf-845f-4527-a170-412296335077",
+      "title": "DS2 - Français",
+      "type": "ds",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "12:00",
+      "location": "Plateau F",
+      "notes": "",
+      "date": "2026-11-28",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "9ccdef43-21b4-471f-9c31-eb5691b9c6fb",
+      "title": "DS3 - Info",
+      "type": "ds",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "12:00",
+      "location": "Plateau F",
+      "notes": "",
+      "date": "2026-12-05",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "8ec6fd85-e588-4211-a03d-a58efee1e1e4",
+      "title": "DS4 - Physique",
+      "type": "ds",
+      "color": "",
+      "allDay": false,
+      "start": "08:00",
+      "end": "12:00",
+      "location": "Plateau F",
+      "notes": "",
+      "date": "2026-12-12",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    }
+  ],
+  "exportedAt": "2026-11-06T00:15:03.623Z"
 }

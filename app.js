@@ -11,7 +11,13 @@ const DEFAULT_DATA = () => ({
   version: 1,
   settings: { rangeStart: '2026-09-01', rangeEnd: '2027-06-30' },
   types: [
-    { id: 'cours', name: 'Cours', color: '#2563eb' },
+    { id: "coursm", name: "Maths", color: "#2563eb" },
+    { id: "coursp", name: "Physique", color: "#2563eb" },
+    { id: "coursi", name: "Info", color: "#2563eb" },
+    { id: "coursf", name: "Français", color: "#2563eb" },
+    { id: "coursa", name: "Anglais", color: "#2563eb" },
+    { id: "courss", name: "Sport", color: "#2563eb" },
+    { id: "courst", name: "TIPE", color: "#2563eb" },
     { id: 'ds', name: 'DS', color: '#dc2626' },
     { id: 'devoir', name: 'Truc à rendre', color: '#d97706', todo: true },
     { id: 'kholle', name: 'Khôlles', color: '#059669' },
@@ -91,6 +97,7 @@ function normalize(raw) {
     if (!e || typeof e.title !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(e.date || '')) continue;
     data.events.push({ ...e, id: e.id || newId(), type: e.type || data.types[0].id });
   }
+
   return data;
 }
 
@@ -144,6 +151,7 @@ async function load() {
    Event expansion (recurrence + per-occurrence exceptions)
    ============================================================ */
 const typeOf = id => state.data.types.find(t => t.id === id) || { id, name: id, color: '#64748b' };
+const colorOf = o => o.color || typeOf(o.type).color;
 const isTodo = id => !!typeOf(id).todo;
 
 function makeOcc(ev, date, over) {
@@ -331,7 +339,7 @@ function renderWeek() {
       const w = 100 / it.n;
       col.append(h('button', {
         class: 'block' + (it.o.done ? ' done' : ''),
-        style: `--c:${typeOf(it.o.type).color};top:${top}px;height:${height - 1}px;left:calc(${it.col * w}% + 1px);width:calc(${w}% - 3px)`,
+        style: `--c:${colorOf(it.o)};top:${top}px;height:${height - 1}px;left:calc(${it.col * w}% + 1px);width:calc(${w}% - 3px)`,
         title: it.o.title,
         onclick: e => { e.stopPropagation(); openEditor(it.o); }
       },
@@ -368,7 +376,7 @@ function renderAgenda() {
 function agendaRow(o) {
   return h('div', {
     class: 'agenda-row' + (o.done ? ' done' : ''),
-    style: `--c:${typeOf(o.type).color}`,
+    style: `--c:${colorOf(o)}`,
     onclick: () => openEditor(o)
   },
     isTodo(o.type) ? h('input', {
@@ -405,7 +413,7 @@ function mini(o, today) {
   const overdue = isTodo(o.type) && !o.done && o.date < today;
   return h('div', {
     class: 'mini' + (o.done ? ' done' : '') + (overdue ? ' overdue' : ''),
-    style: `--c:${typeOf(o.type).color}`,
+    style: `--c:${colorOf(o)}`,
     onclick: () => { state.cursor = o.date; if (state.view === 'agenda') {} render(); openEditor(o); }
   },
     isTodo(o.type) ? h('input', { type: 'checkbox', checked: o.done || null, onclick: e => { e.stopPropagation(); toggleDone(o); } }) : null,
@@ -438,6 +446,8 @@ function setForm(v) {
   $('#f-loc').value = v.location || '';
   $('#f-notes').value = v.notes || '';
   $('#f-done').checked = !!v.done;
+  $('#f-colorcustom').checked = !!v.color;
+  $('#f-color').value = v.color || typeOf(v.type).color;
   const r = v.recur;
   $('#f-repeat').checked = !!r;
   $('#f-interval').value = String(r ? r.interval || 1 : 1);
@@ -511,6 +521,7 @@ function readForm() {
     location: $('#f-loc').value.trim(),
     notes: $('#f-notes').value.trim(),
     done: $('#f-done').checked,
+    color: $('#f-colorcustom').checked ? $('#f-color').value : '',
     repeat: $('#f-repeat').checked,
     interval: +$('#f-interval').value,
     until: $('#f-until').value,
@@ -524,7 +535,7 @@ function formError(msg) {
 }
 
 function cleanFields(f) {
-  const o = { title: f.title, type: f.type, allDay: f.allDay, start: f.start, end: f.end, location: f.location, notes: f.notes };
+  const o = { title: f.title, type: f.type, color:f.color, allDay: f.allDay, start: f.start, end: f.end, location: f.location, notes: f.notes };
   if (isTodo(f.type)) o.done = f.done;
   return o;
 }
@@ -538,8 +549,8 @@ function onSubmit(e) {
   const thisOnly = editing && editing.ev.recur && scope() === 'this';
   let recur = null;
   if (f.repeat && !thisOnly) {
-    if (!f.days.length) return formError('Pick at least one weekday for the repetition.');
-    if (f.until && f.until < f.date) return formError('"Until" must be on or after the start date.');
+    if (!f.days.length) return formError('Au moins un.');
+    if (f.until && f.until < f.date) return formError('"Jusqu\'à" ca veut dire que la date de fin est après le début...');
     recur = { freq: 'weekly', interval: f.interval, days: f.days, until: f.until || state.data.settings.rangeEnd };
   } else if (!thisOnly && f.endDate && f.endDate < f.date) return formError('Le début après la fin carrément...');
 
@@ -591,6 +602,104 @@ function onDelete() {
 }
 
 /* ============================================================
+   Category manager (names, colours, checkbox types)
+   ============================================================ */
+const catDlg = $('#cat-dlg');
+ 
+function openCats() { renderCats(); catDlg.showModal(); }
+ 
+const PRESETS = ['#2563eb', '#0891b2', '#059669', '#65a30d', '#d97706', '#ea580c', '#dc2626', '#db2777', '#7c3aed', '#4f46e5', '#64748b'];
+
+const openCat = new Set();
+ 
+function openCats() { renderCats(); catDlg.showModal(); }
+ 
+function setCatColor(t, color, card) {
+  t.color = color;
+  card.style.setProperty('--c', color);
+  persist();
+}
+ 
+function renderCats() {
+  $('#cat-list').replaceChildren(...state.data.types.map(t => {
+    const n = state.data.events.filter(e => e.type === t.id).length;
+    const meta = h('span', { class: 'cat-meta' });
+    const setMeta = () => { meta.textContent = `${n} event${n === 1 ? '' : 's'}${t.todo ? ' · checklist' : ''}`; };
+    setMeta();
+    const palette = h('div', { class: 'cat-palette', hidden: !openCat.has(t.id) || null });
+    const card = h('div', { class: 'cat-card' + (openCat.has(t.id) ? ' open' : ''), style: `--c:${t.color}` });
+ 
+    const paintPalette = () => {
+      palette.replaceChildren(
+        ...PRESETS.map(c => h('button', {
+          type: 'button', class: 'swatch-btn' + (c.toLowerCase() === t.color.toLowerCase() ? ' on' : ''),
+          style: `--sw:${c}`, 'aria-label': c, title: c,
+          onclick: () => { setCatColor(t, c, card); paintPalette(); }
+        })),
+        h('label', { class: 'custom-pick', title: 'Custom colour' },
+          h('input', { type: 'color', value: t.color, 'aria-label': 'Custom colour', oninput: e => setCatColor(t, e.target.value, card) })),
+        h('span', { class: 'custom-label' }, 'Custom'));
+    };
+    paintPalette();
+ 
+    const dot = h('button', {
+      type: 'button', class: 'cat-dot', 'aria-label': 'Change colour', 'aria-expanded': String(openCat.has(t.id)),
+      onclick: () => {
+        const open = palette.hidden;
+        palette.hidden = !open; card.classList.toggle('open', open);
+        dot.setAttribute('aria-expanded', String(open));
+        open ? openCat.add(t.id) : openCat.delete(t.id);
+      }
+    });
+ 
+    card.append(
+      h('div', { class: 'cat-main' },
+        dot,
+        h('div', { class: 'cat-text' },
+          h('input', {
+            class: 'cat-name', value: t.name, maxlength: '40', 'aria-label': 'Category name',
+            oninput: e => { t.name = e.target.value || t.id; persist(); }
+          }),
+          meta),
+        h('label', { class: 'switch', title: 'Shows a checkbox to tick items off (tasks, deadlines)' },
+          h('input', { type: 'checkbox', checked: !!t.todo || null, onchange: e => { t.todo = e.target.checked; setMeta(); persist(); } }),
+          h('span', { class: 'slider' }), 'Checklist'),
+        h('button', { type: 'button', class: 'btn icon ghost', title: 'Delete category', 'aria-label': 'Delete ' + t.name, onclick: () => deleteCat(t) }, '🗑')),
+      palette);
+    return card;
+  }));
+}
+
+ 
+function addCat() {
+  const used = new Set(state.data.types.map(t => t.color.toLowerCase()));
+  const color = PRESETS.find(c => !used.has(c)) || PRESETS[state.data.types.length % PRESETS.length];
+  const t = { id: 'c' + newId().slice(0, 8), name: 'New category', color };
+  state.data.types.push(t);
+  openCat.add(t.id);
+  persist(); renderCats();
+  const names = $$('.cat-name'); const last = names[names.length - 1];
+  last.scrollIntoView({ block: 'nearest' }); last.select();
+}
+
+ 
+function deleteCat(t) {
+  const types = state.data.types;
+  if (types.length < 2) return alert('Keep at least one category.');
+  const used = state.data.events.filter(e => e.type === t.id).length;
+  const fallback = types.find(x => x.id !== t.id);
+  const msg = used
+    ? `"${t.name}" is used by ${used} event(s). They will be moved to "${fallback.name}". Continue?`
+    : `Delete the category "${t.name}"?`;
+  if (!confirm(msg)) return;
+  state.data.events.forEach(e => { if (e.type === t.id) e.type = fallback.id; });
+  state.data.types = types.filter(x => x.id !== t.id);
+  state.hidden.delete(t.id);
+  persist(); renderCats();
+}
+
+
+/* ============================================================
    Export / import
    ============================================================ */
 function exportJSON() {
@@ -630,6 +739,27 @@ function toast(msg) {
 }
 
 /* ============================================================
+   Theme (auto follows the OS; light / dark force it)
+   ============================================================ */
+const THEMES = [['auto', 'Auto', 'Thème: automatique (se laisse porter)'], ['clair', '☀ ', 'Thème: clair (vraiment?)'], ['sombre', '☾', 'Thème: sombre....']];
+
+function currentTheme() { try { const t = localStorage.getItem('calendar-theme-v1'); return t === 'clair' || t === 'sombre' ? t : 'auto'; } catch { return 'auto'; } }
+
+function applyTheme(t) {
+  if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+  const [, icon, title] = THEMES.find(x => x[0] === t);
+  const b = $('#theme'); b.textContent = icon; b.title = title; b.setAttribute('aria-label', title);
+}
+
+function cycleTheme() {
+  const next = THEMES[(THEMES.findIndex(x => x[0] === currentTheme()) + 1) % THEMES.length][0];
+  try { next === 'auto' ? localStorage.removeItem('calendar-theme-v1') : localStorage.setItem('calendar-theme-v1', next); } catch {}
+  applyTheme(next); toast(THEMES.find(x => x[0] === next)[2]);
+}
+
+
+
+/* ============================================================
    Navigation + wiring
    ============================================================ */
 function shift(dir) {
@@ -655,7 +785,18 @@ function wire() {
   $('#form').addEventListener('submit', onSubmit);
   $('#cancel').onclick = () => dlg.close();
   $('#delete').onclick = onDelete;
-  ['#f-allday', '#f-repeat', '#f-type'].forEach(s => $(s).addEventListener('change', syncForm));
+  ['#f-allday', '#f-repeat', '#f-type', '#f-colorcustom'].forEach(s => $(s).addEventListener('change', syncForm));
+  $('#f-color').addEventListener('input', () => { $('#f-colorcustom').checked = true; });
+  $('#f-type').addEventListener('change', () => {
+    if (!$('#f-colorcustom').checked) $('#f-color').value = typeOf($('#f-type').value).color;
+  });
+  $('#cats').onclick = openCats;
+  $('#cat-add').onclick = addCat;
+  $('#cat-close').onclick = () => catDlg.close();
+  $('#cat-x').onclick = () => catDlg.close();
+  catDlg.addEventListener('close', render);
+  $('#theme').onclick = cycleTheme;
+  applyTheme(currentTheme());
   $$('input[name=scope]').forEach(r => r.addEventListener('change', () => {
     if (editing) $('#f-date').value = scope() === 'all' ? editing.ev.date : editing.origDate;
     syncForm();
@@ -676,12 +817,12 @@ function wire() {
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     const k = e.key.toLowerCase();
     if (k === 'n') { e.preventDefault(); $('#new').click(); }
-    else if (k === 'a') $('#today').click();
+    else if (k === 't') $('#today').click();
     else if (k === 'arrowleft') shift(-1);
     else if (k === 'arrowright') shift(1);
     else if (k === 'm') setView('month');
-    else if (k === 's') setView('week');
-    else if (k === 'l') setView('agenda');
+    else if (k === 'w') setView('week');
+    else if (k === 'a') setView('agenda');
   });
 }
 

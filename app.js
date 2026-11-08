@@ -27,7 +27,7 @@ const DEFAULT_DATA = () => ({
   events: []
 });
 
-const HOUR_START = 0, HOUR_END = 24, PX = 48;
+const HOUR_START = 6, HOUR_END = 24, PX = 48;
 
 /* ============================================================
    Date helpers (all dates are local "YYYY-MM-DD" strings)
@@ -324,7 +324,7 @@ function renderWeek() {
       onclick: e => {
         if (e.target !== col) return;
         const mins = Math.round(((e.offsetY / PX) * 60 + HOUR_START * 60) / 30) * 30;
-        openNew(d, fromMin(Math.min(mins, 21 * 60)));
+        openNew(d, fromMin(Math.min(mins, HOUR_END * 60)));
       }
     });
     const timed = (by[d] || []).filter(o => !o.allDay && o.start).map(o => {
@@ -354,6 +354,8 @@ function renderWeek() {
     }
     return col;
   });
+const totalH = (HOUR_END - HOUR_START) * PX;
+gutter.style.height = totalH + 'px';
 
   return h('div', { class: 'week' }, head, allday, h('div', { class: 'week-body' }, gutter, cols));
 }

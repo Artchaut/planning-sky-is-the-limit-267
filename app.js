@@ -27,7 +27,7 @@ const DEFAULT_DATA = () => ({
   events: []
 });
 
-const HOUR_START = 7, HOUR_END = 22, PX = 48;
+const HOUR_START = 0, HOUR_END = 24, PX = 48;
 
 /* ============================================================
    Date helpers (all dates are local "YYYY-MM-DD" strings)
@@ -664,7 +664,7 @@ function renderCats() {
         h('label', { class: 'switch', title: 'Shows a checkbox to tick items off (tasks, deadlines)' },
           h('input', { type: 'checkbox', checked: !!t.todo || null, onchange: e => { t.todo = e.target.checked; setMeta(); persist(); } }),
           h('span', { class: 'slider' }), 'Checklist'),
-        h('button', { type: 'button', class: 'btn icon ghost', title: 'Delete category', 'aria-label': 'Delete ' + t.name, onclick: () => deleteCat(t) }, '🗑')),
+        h('button', { type: 'button', class: 'btn icon ghost', title: 'Suppr categorie', 'aria-label': 'Suppr ' + t.name, onclick: () => deleteCat(t) }, '🗑')),
       palette);
     return card;
   }));
@@ -674,7 +674,7 @@ function renderCats() {
 function addCat() {
   const used = new Set(state.data.types.map(t => t.color.toLowerCase()));
   const color = PRESETS.find(c => !used.has(c)) || PRESETS[state.data.types.length % PRESETS.length];
-  const t = { id: 'c' + newId().slice(0, 8), name: 'New category', color };
+  const t = { id: 'c' + newId().slice(0, 8), name: 'Nouvelle catégorie', color };
   state.data.types.push(t);
   openCat.add(t.id);
   persist(); renderCats();
@@ -741,9 +741,9 @@ function toast(msg) {
 /* ============================================================
    Theme (auto follows the OS; light / dark force it)
    ============================================================ */
-const THEMES = [['auto', 'Auto', 'Thème: automatique (se laisse porter)'], ['clair', '☀ ', 'Thème: clair (vraiment?)'], ['sombre', '☾', 'Thème: sombre....']];
+const THEMES = [['auto', 'Auto', 'Thème: automatique (se laisse porter)'], ['light', '☀ ', 'Thème: clair (vraiment?)'], ['dark', '☾', 'Thème: sombre....']];
 
-function currentTheme() { try { const t = localStorage.getItem('calendar-theme-v1'); return t === 'clair' || t === 'sombre' ? t : 'auto'; } catch { return 'auto'; } }
+function currentTheme() { try { const t = localStorage.getItem('calendar-theme-v1'); return t === 'light' || t === 'dark' ? t : 'auto'; } catch { return 'auto'; } }
 
 function applyTheme(t) {
   if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
@@ -817,12 +817,12 @@ function wire() {
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     const k = e.key.toLowerCase();
     if (k === 'n') { e.preventDefault(); $('#new').click(); }
-    else if (k === 't') $('#today').click();
+    else if (k === 'a') $('#today').click();
     else if (k === 'arrowleft') shift(-1);
     else if (k === 'arrowright') shift(1);
     else if (k === 'm') setView('month');
-    else if (k === 'w') setView('week');
-    else if (k === 'a') setView('agenda');
+    else if (k === 's') setView('week');
+    else if (k === 'l') setView('agenda');
   });
 }
 

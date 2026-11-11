@@ -7,27 +7,37 @@ const LS_DATA = 'calendar-data-v1';
 const LS_UI = 'calendar-ui-v1';
 const LS_DIRTY = 'calendar-dirty-v1';
 
+// Every category has a kind. A "cours" automatically gets a "devoir" and a "travail" child.
+const KINDS = [['cours', 'Cours'], ['devoir', 'Devoir'], ['travail', 'Travail'], ['perso', 'Perso']];
+
+function courseSet(id, name, color) {
+  return [
+    { id, name, color, kind: 'cours' },
+    { id: id + '-d', name: name + ' – Devoir', color, kind: 'devoir', parent: id },
+    { id: id + '-t', name: name + ' – Travail', color, kind: 'travail', parent: id }
+  ];
+}
+
 const DEFAULT_DATA = () => ({
   version: 1,
   settings: { rangeStart: '2026-09-01', rangeEnd: '2027-06-30' },
   types: [
-    { id: "coursm", name: "Maths", color: "#2563eb" },
-    { id: "coursp", name: "Physique", color: "#2563eb" },
-    { id: "coursi", name: "Info", color: "#2563eb" },
-    { id: "coursf", name: "Français", color: "#2563eb" },
-    { id: "coursa", name: "Anglais", color: "#2563eb" },
-    { id: "courss", name: "Sport", color: "#2563eb" },
-    { id: "courst", name: "TIPE", color: "#2563eb" },
-    { id: 'ds', name: 'DS', color: '#dc2626' },
-    { id: 'devoir', name: 'Truc à rendre', color: '#d97706', todo: true },
-    { id: 'kholle', name: 'Khôlles', color: '#059669' },
-    { id: 'perso', name: 'Trucs Perso', color: '#7c3aed' }
+    ...courseSet('coursm', 'Maths', '#2563eb'),
+    ...courseSet('coursp', 'Physique', '#2563eb'),
+    ...courseSet('coursi', 'Info', '#2563eb'),
+    ...courseSet('coursf', 'Français', '#2563eb'),
+    ...courseSet('coursa', 'Anglais', '#2563eb'),
+    ...courseSet('courss', 'Sport', '#2563eb'),
+    ...courseSet('courst', 'TIPE', '#2563eb'),
+    { id: 'ds', name: 'DS', color: '#dc2626', kind: 'devoir' },
+    { id: 'kholle', name: 'Khôlles', color: '#059669', kind: 'devoir' },
+    { id: 'perso', name: 'Trucs Perso', color: '#7c3aed', kind: 'perso' }
   ],
 
   events: []
 });
 
-const HOUR_START = 6, HOUR_END = 24, PX = 48;
+const HOUR_START = 5, HOUR_END = 24, PX = 48;
 
 /* ============================================================
    Date helpers (all dates are local "YYYY-MM-DD" strings)
@@ -77,7 +87,8 @@ const state = {
   data: null,
   view: 'month',
   cursor: todayISO(),
-  hidden: new Set()
+  hidden: new Set(),
+  sort: 'date' // 'date' | 'matiere' (applies to the list view and the open-tasks list)
 };
 
 function newId() {
@@ -87,15 +98,35 @@ function newId() {
 function normalize(raw) {
   if (!raw || typeof raw !== 'object' || !Array.isArray(raw.events)) throw new Error('This file has no "events" list.');
   const base = DEFAULT_DATA();
+  const rawTypes = Array.isArray(raw.types) && raw.types.length ? raw.types : base.types;
+  const validKind = k => KINDS.some(x => x[0] === k);
+  const migrating = rawTypes.some(t => !validKind(t.kind));
+  const oldTodo = new Set(); // old format: "checklist" was a property of the category
+  let types = rawTypes.map(t => {
+    const { todo, ...rest } = t;
+    if (todo) oldTodo.add(t.id);
+    const guess = String(t.id).startsWith('cours') ? 'cours'
+      : (todo || ['devoir', 'ds', 'kholle'].includes(t.id)) ? 'devoir' : 'perso';
+    return { ...rest, kind: validKind(t.kind) ? t.kind : guess };
+  });
+  if (migrating) { // old data: give every course its devoir/travail categories
+    for (const c of types.filter(t => t.kind === 'cours')) {
+      const have = new Set(types.filter(t => t.parent === c.id).map(t => t.kind));
+      for (const [kind, label] of [['devoir', 'Devoir'], ['travail', 'Travail']]) {
+        if (!have.has(kind)) types.push({ id: `${c.id}-${kind[0]}`, name: `${c.name} – ${label}`, color: c.color, kind, parent: c.id });
+      }
+    }
+  }
   const data = {
     version: 1,
     settings: { ...base.settings, ...(raw.settings || {}) },
-    types: Array.isArray(raw.types) && raw.types.length ? raw.types : base.types,
+    types,
     events: []
   };
   for (const e of raw.events) {
     if (!e || typeof e.title !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(e.date || '')) continue;
-    data.events.push({ ...e, id: e.id || newId(), type: e.type || data.types[0].id });
+    const type = e.type || data.types[0].id;
+    data.events.push({ ...e, id: e.id || newId(), type, todo: e.todo != null ? !!e.todo : oldTodo.has(type) });
   }
 
   return data;
@@ -110,7 +141,7 @@ function persist() {
 }
 
 function saveUI() {
-  try { localStorage.setItem(LS_UI, JSON.stringify({ view: state.view, hidden: [...state.hidden] })); } catch {}
+  try { localStorage.setItem(LS_UI, JSON.stringify({ view: state.view, hidden: [...state.hidden], sort: state.sort })); } catch {}
 }
 
 function updateStatus() {
@@ -133,6 +164,7 @@ async function load() {
     const ui = JSON.parse(localStorage.getItem(LS_UI) || '{}');
     if (['month', 'week', 'agenda'].includes(ui.view)) state.view = ui.view;
     if (Array.isArray(ui.hidden)) state.hidden = new Set(ui.hidden);
+    if (['date', 'matiere'].includes(ui.sort)) state.sort = ui.sort;
   } catch {}
   try {
     const stored = localStorage.getItem(LS_DATA);
@@ -150,9 +182,30 @@ async function load() {
 /* ============================================================
    Event expansion (recurrence + per-occurrence exceptions)
    ============================================================ */
-const typeOf = id => state.data.types.find(t => t.id === id) || { id, name: id, color: '#64748b' };
+const typeOf = id => state.data.types.find(t => t.id === id) || { id, name: id, color: '#64748b', kind: 'perso' };
 const colorOf = o => o.color || typeOf(o.type).color;
-const isTodo = id => !!typeOf(id).todo;
+const isTodo = o => !!(o && o.todo);                 // "à faire" is now a per-event flag
+const isCours = id => typeOf(id).kind === 'cours';
+// Lists (month grid, agenda, sidebar) never show courses: they only live in the week view.
+const listOccurrences = (from, to) => occurrences(from, to).filter(o => !isCours(o.type));
+
+// A "subject" is the parent course of a devoir/travail category, or the category itself (DS, perso...).
+function subjectOf(typeId) {
+  const t = typeOf(typeId);
+  const s = t.parent ? typeOf(t.parent) : t;
+  return { key: s.id, name: s.name, color: s.color };
+}
+// Groups a (date-sorted) list by subject, subjects in the order of the category manager.
+function groupBySubject(list) {
+  const m = new Map();
+  for (const o of list) {
+    const s = subjectOf(o.type);
+    if (!m.has(s.key)) m.set(s.key, { ...s, items: [] });
+    m.get(s.key).items.push(o);
+  }
+  const idx = key => { const i = state.data.types.findIndex(t => t.id === key); return i < 0 ? 1e9 : i; };
+  return [...m.values()].sort((a, b) => idx(a.key) - idx(b.key));
+}
 
 function makeOcc(ev, date, over) {
   const o = { ...ev, ...(over || {}), evId: ev.id, date, origDate: date, recurring: !!ev.recur };
@@ -224,7 +277,7 @@ function chip(o) {
     title: `${o.title}${timeLabel(o) ? '\n' + timeLabel(o) : ''}${o.location ? '\n' + o.location : ''}`,
     onclick: e => { e.stopPropagation(); openEditor(o); }
   },
-    isTodo(o.type) ? (o.done ? '☑ ' : '☐ ') : null,
+    isTodo(o) ? (o.done ? '☑ ' : '☐ ') : null,
     (!o.allDay && o.start) ? h('span', { class: 't' }, o.start) : null,
     o.title);
 }
@@ -238,6 +291,7 @@ function render() {
     label = `${fmtShort.format(parse(m))} – ${fmtShort.format(parse(addDays(m, 6)))} ${parse(addDays(m, 6)).getFullYear()}`;
   } else label = `A partir du ${fmtShort.format(parse(c))}`;
   $('#label').textContent = label;
+  $('#sort').textContent = state.sort === 'date' ? 'Tri : date' : 'Tri : matière';
   $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === state.view));
 
   const prevScroll = $('.week-body') ? $('.week-body').scrollTop : null;
@@ -255,7 +309,7 @@ function renderMonth() {
   const first = iso(new Date(cur.getFullYear(), cur.getMonth(), 1));
   const start = mondayOf(first);
   const end = addDays(start, 41);
-  const by = groupByDate(occurrences(start, end));
+  const by = groupByDate(listOccurrences(start, end));
   const today = todayISO();
 
   const grid = h('div', { class: 'grid7 month-grid' });
@@ -343,7 +397,7 @@ function renderWeek() {
         title: it.o.title,
         onclick: e => { e.stopPropagation(); openEditor(it.o); }
       },
-        h('span', { class: 't' }, (isTodo(it.o.type) ? (it.o.done ? '☑ ' : '☐ ') : '') + it.o.title),
+        h('span', { class: 't' }, (isTodo(it.o) ? (it.o.done ? '☑ ' : '☐ ') : '') + it.o.title),
         h('span', { class: 'l' }, timeLabel(it.o) + (it.o.location ? ' · ' + it.o.location : ''))));
     });
     if (d === today) {
@@ -362,11 +416,19 @@ gutter.style.height = totalH + 'px';
 
 function renderAgenda() {
   const from = state.cursor, to = addDays(from, 59);
-  const by = groupByDate(occurrences(from, to));
+  const by = groupByDate(listOccurrences(from, to));
   const dates = Object.keys(by).sort();
   const today = todayISO();
   const box = h('div', { class: 'agenda' });
   if (!dates.length) box.append(h('p', { class: 'empty' }, 'Rien à faire dans les prochains 60 (SOIXANTE) jours. Chômeu.r.se'));
+  if (state.sort === 'matiere') {
+    for (const g of groupBySubject(dates.flatMap(d => by[d]))) {
+      box.append(h('div', { class: 'agenda-day' },
+        h('div', { class: 'dh subj', style: `--c:${g.color}` }, g.name),
+        h('div', {}, g.items.map(o => agendaRow(o, true)))));
+    }
+    return box;
+  }
   for (const d of dates) {
     box.append(h('div', { class: 'agenda-day' + (d === today ? ' today' : '') },
       h('div', { class: 'dh' }, fmtLong.format(parse(d))),
@@ -375,17 +437,19 @@ function renderAgenda() {
   return box;
 }
 
-function agendaRow(o) {
+function agendaRow(o, withDate) {
   return h('div', {
     class: 'agenda-row' + (o.done ? ' done' : ''),
     style: `--c:${colorOf(o)}`,
     onclick: () => openEditor(o)
   },
-    isTodo(o.type) ? h('input', {
+    isTodo(o) ? h('input', {
       type: 'checkbox', checked: o.done || null,
       onclick: e => { e.stopPropagation(); toggleDone(o); }
     }) : null,
-    h('span', { class: 'tm' }, timeLabel(o) || 'All day'),
+    withDate
+      ? h('span', { class: 'tm dated' }, fmtDay.format(parse(o.date)) + (timeLabel(o) ? ' · ' + timeLabel(o) : ''))
+      : h('span', { class: 'tm' }, timeLabel(o) || 'All day'),
     h('div', {},
       h('div', { class: 'ttl' }, o.title),
       h('div', { class: 'sub' }, [typeOf(o.type).name, o.location].filter(Boolean).join(' · '))));
@@ -402,23 +466,27 @@ function renderSidebar() {
 
   const today = todayISO();
   // next 7 days
-  const up = occurrences(today, addDays(today, 6));
+  const up = listOccurrences(today, addDays(today, 6));
   $('#upcoming').replaceChildren(...(up.length ? up.slice(0, 15).map(o => mini(o, today)) : [h('div', { class: 'empty' }, 'Rien de prévu 🎉.')]));
 
   // open tasks (overdue + next 90 days)
   const tasks = occurrences(state.data.settings.rangeStart, addDays(today, 90))
-    .filter(o => isTodo(o.type) && !o.done);
-  $('#tasks').replaceChildren(...(tasks.length ? tasks.slice(0, 25).map(o => mini(o, today)) : [h('div', { class: 'empty' }, 'Tout est bon 😎')]));
+    .filter(o => isTodo(o) && !o.done);
+  const shown = tasks.slice(0, 25);
+  $('#tasks').replaceChildren(...(!shown.length ? [h('div', { class: 'empty' }, 'Tout est bon 😎')]
+    : state.sort === 'matiere'
+      ? groupBySubject(shown).flatMap(g => [h('div', { class: 'mini-subject', style: `--c:${g.color}` }, g.name), ...g.items.map(o => mini(o, today))])
+      : shown.map(o => mini(o, today))));
 }
 
 function mini(o, today) {
-  const overdue = isTodo(o.type) && !o.done && o.date < today;
+  const overdue = isTodo(o) && !o.done && o.date < today;
   return h('div', {
     class: 'mini' + (o.done ? ' done' : '') + (overdue ? ' overdue' : ''),
     style: `--c:${colorOf(o)}`,
     onclick: () => { state.cursor = o.date; if (state.view === 'agenda') {} render(); openEditor(o); }
   },
-    isTodo(o.type) ? h('input', { type: 'checkbox', checked: o.done || null, onclick: e => { e.stopPropagation(); toggleDone(o); } }) : null,
+    isTodo(o) ? h('input', { type: 'checkbox', checked: o.done || null, onclick: e => { e.stopPropagation(); toggleDone(o); } }) : null,
     h('div', {},
       h('div', { class: 'ttl' }, o.title),
       h('div', { class: 'when' }, (overdue ? 'En retard · ' : '') + fmtDay.format(parse(o.date)) + (timeLabel(o) ? ' · ' + timeLabel(o) : ''))));
@@ -431,7 +499,15 @@ const dlg = $('#dlg');
 let editing = null; // { ev, origDate } or null for a new event
 
 function fillTypes() {
-  $('#f-type').replaceChildren(...state.data.types.map(t => h('option', { value: t.id }, t.name)));
+  $('#f-type').replaceChildren(...KINDS.map(([k, label]) => {
+    const ts = state.data.types.filter(t => t.kind === k);
+    return ts.length ? h('optgroup', { label }, ts.map(t => h('option', { value: t.id }, t.name))) : null;
+  }).filter(Boolean));
+}
+function buildTodoField() {
+  const row = h('label', { id: 'todo-row', class: 'check' },
+    h('input', { type: 'checkbox', id: 'f-todo' }), 'À faire (avec case à cocher)');
+  $('#done-row').before(row);
 }
 function buildDays() {
   $('#days').replaceChildren(...WD.map((n, i) => h('label', {}, h('input', { type: 'checkbox', name: 'day', value: String(i) }), n)));
@@ -447,6 +523,7 @@ function setForm(v) {
   $('#f-endtime').value = v.end || '';
   $('#f-loc').value = v.location || '';
   $('#f-notes').value = v.notes || '';
+  $('#f-todo').checked = !!v.todo;
   $('#f-done').checked = !!v.done;
   $('#f-colorcustom').checked = !!v.color;
   $('#f-color').value = v.color || typeOf(v.type).color;
@@ -503,7 +580,7 @@ function syncForm() {
   const thisOnly = recurringEdit && scope() === 'this';
   const repeat = $('#f-repeat').checked;
   $('#time-row').hidden = $('#f-allday').checked;
-  $('#done-row').hidden = !isTodo($('#f-type').value);
+  $('#done-row').hidden = !$('#f-todo').checked;
   $('#repeat-toggle').hidden = thisOnly;
   $('#repeat-box').hidden = thisOnly || !repeat;
   $('#end-field').hidden = thisOnly || repeat;
@@ -522,6 +599,7 @@ function readForm() {
     end: allDay ? '' : $('#f-endtime').value,
     location: $('#f-loc').value.trim(),
     notes: $('#f-notes').value.trim(),
+    todo: $('#f-todo').checked,
     done: $('#f-done').checked,
     color: $('#f-colorcustom').checked ? $('#f-color').value : '',
     repeat: $('#f-repeat').checked,
@@ -537,8 +615,8 @@ function formError(msg) {
 }
 
 function cleanFields(f) {
-  const o = { title: f.title, type: f.type, color:f.color, allDay: f.allDay, start: f.start, end: f.end, location: f.location, notes: f.notes };
-  if (isTodo(f.type)) o.done = f.done;
+  const o = { title: f.title, type: f.type, color:f.color, allDay: f.allDay, start: f.start, end: f.end, location: f.location, notes: f.notes, todo: f.todo };
+  if (f.todo) o.done = f.done;
   return o;
 }
 
@@ -562,7 +640,7 @@ function onSubmit(e) {
     state.data.events.push({ id: newId(), ...fields, date: f.date, endDate: recur ? '' : f.endDate, recur, exceptions: {} });
   } else if (!editing.ev.recur) {
     Object.assign(editing.ev, fields, { date: f.date, endDate: recur ? '' : f.endDate, recur });
-    if (!isTodo(f.type)) delete editing.ev.done;
+    if (!f.todo) delete editing.ev.done;
     if (recur) editing.ev.exceptions = {};
   } else if (!thisOnly) {
     const ev = editing.ev;
@@ -607,30 +685,57 @@ function onDelete() {
    Category manager (names, colours, checkbox types)
    ============================================================ */
 const catDlg = $('#cat-dlg');
- 
-function openCats() { renderCats(); catDlg.showModal(); }
- 
+
 const PRESETS = ['#2563eb', '#0891b2', '#059669', '#65a30d', '#d97706', '#ea580c', '#dc2626', '#db2777', '#7c3aed', '#4f46e5', '#64748b'];
 
 const openCat = new Set();
- 
+
 function openCats() { renderCats(); catDlg.showModal(); }
- 
+
+const childrenOf = t => state.data.types.filter(x => x.parent === t.id);
+const KIND_SUFFIX = { devoir: 'Devoir', travail: 'Travail' };
+
+// Creates the missing "devoir" / "travail" categories right after a course.
+function makeCourseChildren(t) {
+  const have = new Set(childrenOf(t).map(x => x.kind));
+  const out = ['devoir', 'travail']
+    .filter(kind => !have.has(kind))
+    .map(kind => ({ id: 'c' + newId().slice(0, 8), name: `${t.name} – ${KIND_SUFFIX[kind]}`, color: t.color, kind, parent: t.id }));
+  state.data.types.splice(state.data.types.indexOf(t) + 1, 0, ...out);
+}
+
+// Keeps the open dialog in sync when a course change propagates to its children.
+function refreshCard(c) {
+  const card = $(`.cat-card[data-id="${c.id}"]`);
+  if (!card) return;
+  card.style.setProperty('--c', c.color);
+  $('.cat-name', card).value = c.name;
+}
+
 function setCatColor(t, color, card) {
+  const old = t.color;
   t.color = color;
   card.style.setProperty('--c', color);
+  if (t.kind === 'cours') childrenOf(t).forEach(c => { if (c.color === old) { c.color = color; refreshCard(c); } });
   persist();
 }
- 
+
+function renameCat(t, name) {
+  const old = t.name;
+  t.name = name || t.id;
+  if (t.kind === 'cours') childrenOf(t).forEach(c => {
+    if (c.name === `${old} – ${KIND_SUFFIX[c.kind]}`) { c.name = `${t.name} – ${KIND_SUFFIX[c.kind]}`; refreshCard(c); }
+  });
+  persist();
+}
+
 function renderCats() {
   $('#cat-list').replaceChildren(...state.data.types.map(t => {
     const n = state.data.events.filter(e => e.type === t.id).length;
-    const meta = h('span', { class: 'cat-meta' });
-    const setMeta = () => { meta.textContent = `${n} event${n === 1 ? '' : 's'}${t.todo ? ' · checklist' : ''}`; };
-    setMeta();
+    const meta = h('span', { class: 'cat-meta' }, `${n} événement${n === 1 ? '' : 's'}`);
     const palette = h('div', { class: 'cat-palette', hidden: !openCat.has(t.id) || null });
-    const card = h('div', { class: 'cat-card' + (openCat.has(t.id) ? ' open' : ''), style: `--c:${t.color}` });
- 
+    const card = h('div', { class: 'cat-card' + (openCat.has(t.id) ? ' open' : ''), 'data-id': t.id, style: `--c:${t.color}` });
+
     const paintPalette = () => {
       palette.replaceChildren(
         ...PRESETS.map(c => h('button', {
@@ -643,7 +748,7 @@ function renderCats() {
         h('span', { class: 'custom-label' }, 'Custom'));
     };
     paintPalette();
- 
+
     const dot = h('button', {
       type: 'button', class: 'cat-dot', 'aria-label': 'Change colour', 'aria-expanded': String(openCat.has(t.id)),
       onclick: () => {
@@ -653,50 +758,64 @@ function renderCats() {
         open ? openCat.add(t.id) : openCat.delete(t.id);
       }
     });
- 
+
+    const kindSel = h('select', {
+      class: 'cat-kind', title: 'Type de catégorie', 'aria-label': 'Type de catégorie',
+      onchange: e => {
+        const was = t.kind;
+        t.kind = e.target.value;
+        if (was === 'cours' && t.kind !== 'cours') childrenOf(t).forEach(c => delete c.parent);
+        if (t.kind === 'cours' && !childrenOf(t).length) makeCourseChildren(t);
+        persist(); renderCats();
+      }
+    }, KINDS.map(([v, l]) => h('option', { value: v, selected: v === t.kind || null }, l)));
+
     card.append(
       h('div', { class: 'cat-main' },
         dot,
         h('div', { class: 'cat-text' },
           h('input', {
-            class: 'cat-name', value: t.name, maxlength: '40', 'aria-label': 'Category name',
-            oninput: e => { t.name = e.target.value || t.id; persist(); }
+            class: 'cat-name', 'data-id': t.id, value: t.name, maxlength: '40', 'aria-label': 'Category name',
+            oninput: e => renameCat(t, e.target.value)
           }),
           meta),
-        h('label', { class: 'switch', title: 'Shows a checkbox to tick items off (tasks, deadlines)' },
-          h('input', { type: 'checkbox', checked: !!t.todo || null, onchange: e => { t.todo = e.target.checked; setMeta(); persist(); } }),
-          h('span', { class: 'slider' }), 'Checklist'),
-        h('button', { type: 'button', class: 'btn icon ghost', title: 'Suppr categorie', 'aria-label': 'Suppr ' + t.name, onclick: () => deleteCat(t) }, '🗑')),
+        kindSel,
+        h('button', { type: 'button', class: 'btn icon ghost', title: 'Delete category', 'aria-label': 'Delete ' + t.name, onclick: () => deleteCat(t) }, '🗑')),
       palette);
     return card;
   }));
 }
 
- 
 function addCat() {
+  const kind = ($('#cat-add-kind') || {}).value || 'cours';
   const used = new Set(state.data.types.map(t => t.color.toLowerCase()));
   const color = PRESETS.find(c => !used.has(c)) || PRESETS[state.data.types.length % PRESETS.length];
-  const t = { id: 'c' + newId().slice(0, 8), name: 'Nouvelle catégorie', color };
+  const t = { id: 'c' + newId().slice(0, 8), name: 'Nouvelle catégorie', color, kind };
   state.data.types.push(t);
+  if (kind === 'cours') makeCourseChildren(t);   // a new course comes with its devoir + travail
   openCat.add(t.id);
   persist(); renderCats();
-  const names = $$('.cat-name'); const last = names[names.length - 1];
-  last.scrollIntoView({ block: 'nearest' }); last.select();
+  const input = $$('.cat-name').find(i => i.dataset.id === t.id);
+  input.scrollIntoView({ block: 'nearest' }); input.select();
 }
 
- 
 function deleteCat(t) {
-  const types = state.data.types;
-  if (types.length < 2) return alert('Keep at least one category.');
-  const used = state.data.events.filter(e => e.type === t.id).length;
-  const fallback = types.find(x => x.id !== t.id);
+  const doomed = [t, ...childrenOf(t)];            // deleting a course also deletes its devoir/travail
+  const ids = new Set(doomed.map(x => x.id));
+  const fallback = state.data.types.find(x => !ids.has(x.id));
+  if (!fallback) return alert('Garde au moins une catégorie.');
+  const used = state.data.events.filter(e => ids.has(e.type)).length;
+  const extra = doomed.length > 1 ? ` (et ses catégories associées : ${doomed.slice(1).map(x => x.name).join(', ')})` : '';
   const msg = used
-    ? `"${t.name}" is used by ${used} event(s). They will be moved to "${fallback.name}". Continue?`
-    : `Delete the category "${t.name}"?`;
+    ? `"${t.name}"${extra} est utilisée par ${used} événement(s). Ils seront déplacés vers "${fallback.name}". Continuer ?`
+    : `Supprimer "${t.name}"${extra} ?`;
   if (!confirm(msg)) return;
-  state.data.events.forEach(e => { if (e.type === t.id) e.type = fallback.id; });
-  state.data.types = types.filter(x => x.id !== t.id);
-  state.hidden.delete(t.id);
+  state.data.events.forEach(e => {
+    if (ids.has(e.type)) e.type = fallback.id;
+    Object.values(e.exceptions || {}).forEach(x => { if (ids.has(x.type)) x.type = fallback.id; });
+  });
+  state.data.types = state.data.types.filter(x => !ids.has(x.id));
+  ids.forEach(id => state.hidden.delete(id));
   persist(); renderCats();
 }
 
@@ -779,6 +898,9 @@ function wire() {
   $('#today').onclick = () => { state.cursor = todayISO(); render(); };
   $('#new').onclick = () => openNew(state.view === 'month' ? todayISO() : state.cursor);
   $$('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+  const sortBtn = h('button', { id: 'sort', class: 'btn', type: 'button', title: 'Trier la liste et les tâches ouvertes : par date ou par matière' });
+  sortBtn.onclick = () => { state.sort = state.sort === 'date' ? 'matiere' : 'date'; saveUI(); render(); };
+  $('.views').after(sortBtn);
   $('#export').onclick = exportJSON;
   $('#import').onclick = () => $('#file').click();
   $('#file').onchange = e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; };
@@ -787,12 +909,14 @@ function wire() {
   $('#form').addEventListener('submit', onSubmit);
   $('#cancel').onclick = () => dlg.close();
   $('#delete').onclick = onDelete;
-  ['#f-allday', '#f-repeat', '#f-type', '#f-colorcustom'].forEach(s => $(s).addEventListener('change', syncForm));
+  ['#f-allday', '#f-repeat', '#f-type', '#f-colorcustom', '#f-todo'].forEach(s => $(s).addEventListener('change', syncForm));
   $('#f-color').addEventListener('input', () => { $('#f-colorcustom').checked = true; });
   $('#f-type').addEventListener('change', () => {
     if (!$('#f-colorcustom').checked) $('#f-color').value = typeOf($('#f-type').value).color;
   });
   $('#cats').onclick = openCats;
+  $('#cat-add').before(h('select', { id: 'cat-add-kind', 'aria-label': 'Type de la nouvelle catégorie', title: 'Type de la nouvelle catégorie' },
+    KINDS.map(([v, l]) => h('option', { value: v }, l))));
   $('#cat-add').onclick = addCat;
   $('#cat-close').onclick = () => catDlg.close();
   $('#cat-x').onclick = () => catDlg.close();
@@ -830,6 +954,7 @@ function wire() {
 
 (async function init() {
   buildDays();
+  buildTodoField();
   wire();
   await load();
   render();

@@ -1,3 +1,6 @@
+
+
+
 /* Theme: light by default; dark via OS preference ("auto") or forced with data-theme */
 :root {
   --bg: #f4f5f8;
@@ -144,10 +147,10 @@ summary.btn::-webkit-details-marker { display: none; }
 .week-allday > div { padding: 3px; border-left: 1px solid var(--border); min-height: 26px; }
 .week-allday > div:first-child { border-left: 0; font-size: 10px; color: var(--muted); padding-top: 6px; }
 .week-body { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); }
-.gutter { position: relative; height: calc(var(--px) * 15); }
+.gutter { position: relative; height: calc(var(--px) * 19); }
 .gutter span { position: absolute; right: 6px; font-size: 10px; color: var(--muted); transform: translateY(-6px); }
 .col {
-  position: relative; height: calc(var(--px) * 15); border-left: 1px solid var(--border);
+  position: relative; height: calc(var(--px) * 19); border-left: 1px solid var(--border);
   background-image: linear-gradient(var(--border) 1px, transparent 1px);
   background-size: 100% var(--px);
 }

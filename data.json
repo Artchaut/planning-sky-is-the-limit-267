@@ -873,6 +873,9 @@
         },
         "2027-03-12": {
           "deleted": true
+        },
+        "2026-11-20": {
+          "deleted": true
         }
       },
       "todo": false
@@ -2591,7 +2594,19 @@
         ],
         "until": "2026-12-18"
       },
-      "exceptions": {}
+      "exceptions": {
+        "2026-11-17": {
+          "title": "Miam-miam",
+          "type": "ce8262fa9",
+          "color": "",
+          "allDay": false,
+          "start": "19:00",
+          "end": "19:45",
+          "location": "Self",
+          "notes": "",
+          "todo": false
+        }
+      }
     },
     {
       "id": "93382547-9319-4013-b714-63dbdc153d23",
@@ -3494,7 +3509,7 @@
       "endDate": "",
       "recur": null,
       "exceptions": {},
-      "done": false
+      "done": true
     },
     {
       "id": "4628d685-40b7-4d19-9778-f312887a2cd6",
@@ -3531,12 +3546,12 @@
     },
     {
       "id": "2bafed11-4ee2-4db6-8e1a-9aa4f7720da7",
-      "title": "Lire le cours de Sauvageot",
+      "title": "Apprendre les formules de Taylor",
       "type": "coursm-t",
       "color": "",
       "allDay": false,
-      "start": "21:00",
-      "end": "22:00",
+      "start": "22:15",
+      "end": "22:45",
       "location": "J-309",
       "notes": "",
       "todo": true,
@@ -3569,7 +3584,19 @@
         ],
         "until": "2026-11-20"
       },
-      "exceptions": {}
+      "exceptions": {
+        "2026-11-17": {
+          "title": "Douche",
+          "type": "perso",
+          "color": "",
+          "allDay": false,
+          "start": "20:15",
+          "end": "20:45",
+          "location": "",
+          "notes": "",
+          "todo": false
+        }
+      }
     },
     {
       "id": "1f9f6ae6-eae1-4aca-b6c5-5d84b0b0f823",
@@ -3610,7 +3637,11 @@
         ],
         "until": "2026-11-20"
       },
-      "exceptions": {}
+      "exceptions": {
+        "2026-11-17": {
+          "deleted": true
+        }
+      }
     },
     {
       "id": "2d7a02f0-a7de-4c02-bef4-c935d969587b",
@@ -3635,8 +3666,8 @@
       "type": "coursm-t",
       "color": "",
       "allDay": false,
-      "start": "20:00",
-      "end": "21:00",
+      "start": "21:00",
+      "end": "22:15",
       "location": "J-309",
       "notes": "",
       "todo": true,
@@ -3657,7 +3688,7 @@
       "location": "J-309",
       "notes": "",
       "todo": true,
-      "done": false,
+      "done": true,
       "date": "2026-11-17",
       "endDate": "",
       "recur": null,
@@ -3746,7 +3777,7 @@
     },
     {
       "id": "3ee12a5f-e492-4fde-9787-79fc85021510",
-      "title": "Lecture au CDI",
+      "title": "Faire la liste des course avec Elisa",
       "type": "cc3b5dfd4",
       "color": "",
       "allDay": false,
@@ -3754,11 +3785,12 @@
       "end": "13:30",
       "location": "E-100",
       "notes": "",
-      "todo": false,
+      "todo": true,
       "date": "2026-11-18",
       "endDate": "",
       "recur": null,
-      "exceptions": {}
+      "exceptions": {},
+      "done": false
     },
     {
       "id": "a6115e91-a01a-4b32-93c5-c2099b475aeb",
@@ -3799,8 +3831,8 @@
       "type": "ce8262fa9",
       "color": "",
       "allDay": false,
-      "start": "12:00",
-      "end": "12:45",
+      "start": "11:30",
+      "end": "12:00",
       "location": "Self",
       "notes": "",
       "todo": false,
@@ -3825,7 +3857,41 @@
       "endDate": "",
       "recur": null,
       "exceptions": {}
+    },
+    {
+      "id": "76d4650b-988b-4c04-8916-53645c383e8a",
+      "title": "Révision DS Maths",
+      "type": "coursm-t",
+      "color": "",
+      "allDay": false,
+      "start": "09:45",
+      "end": "11:30",
+      "location": "",
+      "notes": "",
+      "todo": true,
+      "done": false,
+      "date": "2026-11-20",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
+    },
+    {
+      "id": "1be4bb47-34aa-4365-a8e0-d4061ae5319d",
+      "title": "Relire le Compte Rendu du TD du 10/11/2026",
+      "type": "coursm-t",
+      "color": "",
+      "allDay": false,
+      "start": "07:30",
+      "end": "08:00",
+      "location": "H-207",
+      "notes": "Exercice 7-17",
+      "todo": true,
+      "done": false,
+      "date": "2026-11-18",
+      "endDate": "",
+      "recur": null,
+      "exceptions": {}
     }
   ],
-  "exportedAt": "2026-11-16T22:00:18.665Z"
+  "exportedAt": "2026-11-17T21:10:46.110Z"
 }
